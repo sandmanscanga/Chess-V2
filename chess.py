@@ -1,6 +1,7 @@
 import tkinter as tk
 import sys
 
+## Cross-Platform Compatibility
 if sys.platform == "linux":
     piece_size = 56
 else:
@@ -11,27 +12,29 @@ class Square:
 
     length = 75
     colors = ("#212121", "#bdbdbd")
-    highlight = "#4dd0e1"
+    selectedColor = "#4dd0e1"
+    possibleColor = "#26c6da"
     isSelected = False
+    isPossible = False
 
     def __init__(self, row, col):
         (self.row, self.col) = (row, col)
         color_id = (self.row + self.col) % 2
         self.color = self.colors[color_id]
-        self.coords = None
-
-    def __str__(self):
-        return f"Square ({self.row}, {self.col}) "
-
-    def draw(self, canvas):
         x1 = self.length * self.col
         y1 = self.length * self.row
         x2 = self.length + x1
         y2 = self.length + y1
         self.coords = (x1, y1, x2, y2)
 
+    def __str__(self):
+        return f"Square ({self.row}, {self.col}) "
+
+    def draw(self, canvas):
         if self.isSelected:
-            canvas.create_rectangle(*self.coords, fill=self.highlight)
+            canvas.create_rectangle(*self.coords, fill=self.selectedColor)
+        elif self.isPossible:
+            canvas.create_rectangle(*self.coords, fill=self.possibleColor)
         else:
             canvas.create_rectangle(*self.coords, fill=self.color)
 
@@ -66,12 +69,16 @@ class Pawn(Piece):
         name = "Pawn"
         super().__init__(row, col, char, color, name)
 
-    def move(self):
+    def get_possible_moves(self):
+        moves = []
         if self.color == "white":
-            self.row -= 1
+            moves.append((self.row - 1), self.col)
+            if self.hasNotMoved:
+                moves.append((self.row - 2), self.col)
         else:
-            self.row += 1
-
+            moves.append((self.row + 1), self.col)
+            if self.hasNotMoved:
+                moves.append((self.row + 2), self.col)
 
 
 class Rook:
@@ -93,6 +100,7 @@ class King:
 class Board:
 
     clickedLast = None
+    piecePrimed = False
 
     def __init__(self, master):
         self.canvas = tk.Canvas(master, width=600, height=600)
@@ -169,6 +177,7 @@ class Board:
 
         if selectedPiece:
             if selectedPiece.name == "Pawn":
+                ## get possible moves for pawn
                 selectedPiece.move()
                 selectedSquare.isSelected = False
 
