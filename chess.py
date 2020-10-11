@@ -1,4 +1,10 @@
 import tkinter as tk
+import sys
+
+if sys.platform == "linux":
+    piece_size = 56
+else:
+    piece_size = 36
 
 
 class Square:
@@ -48,7 +54,7 @@ class Piece:
         x = (Square.length * self.col) + (Square.length / 2) 
         y = (Square.length * self.row) + (Square.length / 2)
         canvas.create_text(x, y, text=self.char, 
-            fill=self.color, font=("", 36))        
+            fill=self.color, font=("", piece_size))
 
 
 class Pawn(Piece):
@@ -100,6 +106,7 @@ class Board:
                 self.squares.append(square)
                 if row in (0,1,6,7):
                     
+                    ## Pawn
                     if row in (1, 6):
                         if row == 1:
                             pawn = Pawn(row, col, "black")
