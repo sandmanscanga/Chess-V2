@@ -12,8 +12,8 @@ class Square:
 
     length = 75
     colors = ("#212121", "#bdbdbd")
-    selectedColor = "#4dd0e1"
-    possibleColor = "#26c6da"
+    selectedColor = "#ffeb3b" # Gold
+    possibleColor = "#26c6da" # Cyan
     isSelected = False
     isPossible = False
 
@@ -65,126 +65,61 @@ class Pawn(Piece):
     hasNotMoved = True
     
     def __init__(self, row, col, color):
-        char = 0x265f
-        name = "Pawn"
-        super().__init__(row, col, char, color, name)
-
-    def get_possible_moves(self):
-        moves = []
-        if self.color == "white":
-            moves.append((self.row - 1), self.col)
-            if self.hasNotMoved:
-                moves.append((self.row - 2), self.col)
-        else:
-            moves.append((self.row + 1), self.col)
-            if self.hasNotMoved:
-                moves.append((self.row + 2), self.col)
+        super().__init__(row, col, 0x265f, color, "Pawn")
 
 
-class Rook:
-    pass
+class Rook(Piece):
+    
+    def __init__(self, row, col, color):
+        super().__init__(row, col, 0x265c, color, "Rook")
 
-class Knight:
-    pass
 
-class Bishop:
-    pass
+class Knight(Piece):
+    
+    def __init__(self, row, col, color):
+        super().__init__(row, col, 0x265e, color, "Knight")
 
-class Queen:
-    pass
+class Bishop(Piece):
 
-class King:
-    pass
+    def __init__(self, row, col, color):
+        super().__init__(row, col, 0x265d, color, "Bishop")
+
+class Queen(Piece):
+    
+    def __init__(self, row, color):
+        super().__init__(row, 3, 0x265b, color, "Queen")
+
+class King(Piece):
+    
+    def __init__(self, row, color):
+        super().__init__(row, 4, 0x265a, color, "King")
 
 
 class Board:
 
-    clickedLast = None
-    piecePrimed = False
-
     def __init__(self, master):
         self.canvas = tk.Canvas(master, width=600, height=600)
-
-        ## create the initial squares
-        self.squares = []
-        self.pieces = []
-        for row in range(8):
-            for col in range(8):
-                square = Square(row, col)
-                self.squares.append(square)
-                if row in (0,1,6,7):
-                    
-                    ## Pawn
-                    if row in (1, 6):
-                        if row == 1:
-                            pawn = Pawn(row, col, "black")
-                        else:
-                            pawn = Pawn(row, col, "white")
-
-                        self.pieces.append(pawn)
-                        continue
-
-                    # setting character
-                    if row in (0,7):
-                        if col in (0,7):
-                            char = 0x265c
-                            name = "Rook"
-                        elif col in (1,6):
-                            char = 0x265e
-                            name = "Knight"
-                        elif col in (2,5):
-                            char = 0x265d
-                            name = "Bishop"
-                        elif col == 3: 
-                            char = 0x265b
-                            name = "Queen"
-                        elif col == 4:
-                            char = 0x265a
-                            name = "King"
-
-                    # setting color
-                    if row in (0,1):
-                        color = Piece.black
-                    elif row in (6,7):
-                        color = Piece.white    
-
-                    piece = Piece(row, col, char, color, name)
-                    self.pieces.append(piece)
-
+        self.squares = self.init_squares()
+        self.pieces = self.init_pieces()
         self.draw_squares()
         self.draw_pieces()
-
         self.canvas.bind("<Button-1>", self.left_click)
         self.canvas.pack()
 
     def left_click(self, event):
-        col = event.x // Square.length
-        row = event.y // Square.length
+        """
+            Nothing is primed
+                1. Click square with no piece (deselect)
+                2. Click piece (select)
 
-        selectedSquare = self.find_square(row, col)  
-        selectedPiece = self.find_piece(row, col)
-        if selectedPiece:
-            print(selectedSquare, selectedPiece)
-        else:
-            print(selectedSquare, "No piece selected")
-
-        if self.clickedLast == selectedSquare:
-            selectedSquare.isSelected = False
-            self.clickedLast = None
-        else:
-            selectedSquare.isSelected = True
-            self.clickedLast = selectedSquare
-
-        if selectedPiece:
-            if selectedPiece.name == "Pawn":
-                ## get possible moves for pawn
-                selectedPiece.move()
-                selectedSquare.isSelected = False
-
-        self.draw_squares()
-        self.draw_pieces()
-
-        selectedSquare.isSelected = False
+            Piece is primed
+                1. Click square with no piece (deselect)
+                2. Click primed piece (deselect)
+                3. Click unprimed piece (reselect)
+                4. Click possible move (move piece, deselect)
+                5. Click opponent piece (move piece, deselect, remove opponent piece)
+        """
+        pass
 
     def draw_squares(self):
         for square in self.squares:
@@ -203,6 +138,40 @@ class Board:
         for piece in self.pieces:
             if piece.row == row and piece.col == col:
                 return piece
+
+    @staticmethod
+    def init_squares():
+        squares = []
+        for row in range(8):
+            for col in range(8):
+                square = Square(row, col)
+                squares.append(square)
+        return squares
+
+    @staticmethod
+    def init_pieces():
+        pieces = []
+        for row in range(8):
+            for col in range(8):
+                if row in (0, 1, 6, 7):
+                    color = "black" if row in (0, 1) else "white"
+
+                    if row in (1, 6):
+                        piece = Pawn(row, col, color)
+                    elif row in (0, 7):
+                        if col in (0, 7):
+                            piece = Rook(row, col, color)
+                        elif col in (1, 6):
+                            piece = Knight(row, col, color)
+                        elif col in (2, 5):
+                            piece = Bishop(row, col, color)
+                        elif col == 3:
+                            piece = Queen(row, color)
+                        elif col == 4:
+                            piece = King(row, color)
+
+                    pieces.append(piece)
+        return pieces
 
 
 def main():
