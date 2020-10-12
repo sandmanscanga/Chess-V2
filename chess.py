@@ -47,6 +47,7 @@ class Piece:
     
     white = "white"
     black = "black"
+    captured = False
 
     def __init__(self, row, col, char, color, name):
         (self.row, self.col) = (row, col)
@@ -58,10 +59,14 @@ class Piece:
         return f"{self.name} ({self.row}, {self.col}) {self.char} {self.color}"
 
     def draw(self, canvas):
-        x = (Square.length * self.col) + (Square.length / 2) 
-        y = (Square.length * self.row) + (Square.length / 2)
-        canvas.create_text(x, y, text=self.char, 
-            fill=self.color, font=("", piece_size))
+        if not self.captured:
+            x = (Square.length * self.col) + (Square.length / 2) 
+            y = (Square.length * self.row) + (Square.length / 2)
+            canvas.create_text(x, y, text=self.char, 
+                fill=self.color, font=("", piece_size))
+        else:
+            # captured piece is drawn off the board
+            pass
 
 
 class Pawn(Piece):
@@ -123,6 +128,7 @@ class King(Piece):
 class Board:
 
     selectedPiece = None
+    validMoves = None
 
     def __init__(self, master):
         self.canvas = tk.Canvas(master, width=600, height=600)
@@ -152,75 +158,45 @@ class Board:
         square = self.find_square(row, col)
         piece = self.find_piece(row, col)
 
+        print(square, piece, self.selectedPiece, self.validMoves)
+
         # No piece selected previously
         if not self.selectedPiece:
             if piece:
                 self.reset_squares()
                 square.isSelected = True
-                # temp
-                if piece.name == "Knight":
-                    moves = piece.get_possible_moves()
-                    # available moves on board
-                    movesInPlay = []
-                    for move in moves:
-                        if move[0] in range(8) and move[1] in range(8):
-                            movesInPlay.append(move)
 
-                    # valid moves on board        
-                    validMoves = []
-                    for move in movesInPlay:
-                        posSquare = self.find_square(*move)
-                        posPiece = self.find_piece(*move)
-                        if posPiece:
-                            if posPiece.color != piece.color:
-                                # enemy piece, attack
-                                posSquare.isThreat = True
-                            else:
-                                # friendly piece
-                                pass
-                        else:
-                            posSquare.isPossible = True
-                            validMoves.append(move)
+                self.validMoves = self.get_valid_moves(piece)
+                self.selectedPiece = piece
 
                 self.draw_squares()
                 self.draw_pieces()
-                self.selectedPiece = piece
             else:
                 self.reset_squares()
                 self.draw_squares()
                 self.draw_pieces()
         else:
             # piece selected previously
-            self.selectedPiece = None
             if piece:
-                self.reset_squares()
-                square.isSelected = True
-                # temp
-                if piece.name == "Knight":
-                    moves = piece.get_possible_moves()
-                    # available moves on board
-                    movesInPlay = []
-                    for move in moves:
-                        if move[0] in range(8) and move[1] in range(8):
-                            movesInPlay.append(move)
+                if self.selectedPiece.color == piece.color:
+                    self.reset_squares()
+                    square.isSelected = True
+                    self.validMoves = self.get_valid_moves(piece)
+                else:
+                    self.reset_squares()
+                    # attempt to capture enemy piece
+                    if self.selectedPiece.name == "Knight":
+                        if (row, col) in self.validMoves:
+                        # temp
+                            self.move_piece(row, col)
+                            self.remove_piece(piece)
 
-                    # valid moves on board        
-                    validMoves = []
-                    for move in movesInPlay:
-                        posSquare = self.find_square(*move)
-                        posPiece = self.find_piece(*move)
-                        if posPiece:
-                            if posPiece.color != piece.color:
-                                # enemy piece, attack
-                                posSquare.isThreat = True
-                            else:
-                                # friendly piece
-                                pass
-                        else:
-                            posSquare.isPossible = True
-                            validMoves.append(move)
             else:
                 self.reset_squares()
+                if (row, col) in self.validMoves:
+                    # temp
+                    if self.selectedPiece.name == "Knight":
+                        self.move_piece(row, col)
 
 
             self.draw_squares()
@@ -250,6 +226,39 @@ class Board:
             square.isSelected = False
             square.isPossible = False
             square.isThreat = False
+
+    def get_valid_moves(self, piece):
+        if piece.name == "Knight":
+            moves = piece.get_possible_moves()
+            movesInPlay = self.get_moves_in_play(moves)
+
+            # valid moves on board
+            validMoves = []
+            for move in movesInPlay:
+                posSquare = self.find_square(*move)
+                posPiece = self.find_piece(*move)
+                if posPiece:
+                    if posPiece.color != piece.color:
+                        # enemy piece, attack
+                        posSquare.isThreat = True
+                        validMoves.append(move)
+                    else:
+                        # friendly piece
+                        pass
+                else:
+                    posSquare.isPossible = True
+                    validMoves.append(move)
+
+            return validMoves
+
+    def remove_piece(self, piece):
+        pieceId = self.pieces.index(piece)
+        self.pieces.pop(pieceId)
+
+    def move_piece(self, row, col):
+        self.selectedPiece.row = row
+        self.selectedPiece.col = col
+        self.selectedPiece = None
 
     @staticmethod
     def init_squares():
@@ -284,6 +293,14 @@ class Board:
 
                     pieces.append(piece)
         return pieces
+
+    @staticmethod
+    def get_moves_in_play(moves):
+        movesInPlay = []
+        for move in moves:
+            if move[0] in range(8) and move[1] in range(8):
+                movesInPlay.append(move)
+        return movesInPlay
 
 
 def main():
