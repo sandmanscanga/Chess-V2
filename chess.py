@@ -14,8 +14,10 @@ class Square:
     colors = ("#212121", "#bdbdbd")
     selectedColor = "#ffeb3b" # Gold
     possibleColor = "#26c6da" # Cyan
+    threatColor = "#c62828" # red
     isSelected = False
     isPossible = False
+    isThreat = False
 
     def __init__(self, row, col):
         (self.row, self.col) = (row, col)
@@ -35,6 +37,8 @@ class Square:
             canvas.create_rectangle(*self.coords, fill=self.selectedColor)
         elif self.isPossible:
             canvas.create_rectangle(*self.coords, fill=self.possibleColor)
+        elif self.isThreat:
+            canvas.create_rectangle(*self.coords, fill=self.threatColor)
         else:
             canvas.create_rectangle(*self.coords, fill=self.color)
 
@@ -79,6 +83,27 @@ class Knight(Piece):
     def __init__(self, row, col, color):
         super().__init__(row, col, 0x265e, color, "Knight")
 
+    def get_possible_moves(self):
+        # up 2 left 1, 
+        # up 2 right 1, 
+        # right 2 up 1,
+        # right 2 down 1,
+        # down 2 right 1,
+        # down 2 left 1, 
+        # left 2 down 1, 
+        # left 2 up 1
+        moves = [
+            (self.row - 2, self.col - 1),
+            (self.row - 2, self.col + 1),
+            (self.row - 1, self.col + 2),
+            (self.row + 1, self.col + 2),
+            (self.row + 2, self.col + 1),
+            (self.row + 2, self.col - 1),
+            (self.row + 1, self.col - 2),
+            (self.row - 1, self.col - 2),
+        ]
+        return moves
+
 class Bishop(Piece):
 
     def __init__(self, row, col, color):
@@ -97,10 +122,13 @@ class King(Piece):
 
 class Board:
 
+    selectedPiece = None
+
     def __init__(self, master):
         self.canvas = tk.Canvas(master, width=600, height=600)
         self.squares = self.init_squares()
         self.pieces = self.init_pieces()
+        self.pieces.append(Knight(3, 4, "white"))
         self.draw_squares()
         self.draw_pieces()
         self.canvas.bind("<Button-1>", self.left_click)
@@ -112,14 +140,92 @@ class Board:
                 1. Click square with no piece (deselect)
                 2. Click piece (select)
 
-            Piece is primed
+            Board is primed
                 1. Click square with no piece (deselect)
                 2. Click primed piece (deselect)
                 3. Click unprimed piece (reselect)
                 4. Click possible move (move piece, deselect)
                 5. Click opponent piece (move piece, deselect, remove opponent piece)
         """
-        pass
+        row = event.y // Square.length
+        col = event.x // Square.length
+        square = self.find_square(row, col)
+        piece = self.find_piece(row, col)
+
+        # No piece selected previously
+        if not self.selectedPiece:
+            if piece:
+                self.reset_squares()
+                square.isSelected = True
+                # temp
+                if piece.name == "Knight":
+                    moves = piece.get_possible_moves()
+                    # available moves on board
+                    movesInPlay = []
+                    for move in moves:
+                        if move[0] in range(8) and move[1] in range(8):
+                            movesInPlay.append(move)
+
+                    # valid moves on board        
+                    validMoves = []
+                    for move in movesInPlay:
+                        posSquare = self.find_square(*move)
+                        posPiece = self.find_piece(*move)
+                        if posPiece:
+                            if posPiece.color != piece.color:
+                                # enemy piece, attack
+                                posSquare.isThreat = True
+                            else:
+                                # friendly piece
+                                pass
+                        else:
+                            posSquare.isPossible = True
+                            validMoves.append(move)
+
+                self.draw_squares()
+                self.draw_pieces()
+                self.selectedPiece = piece
+            else:
+                self.reset_squares()
+                self.draw_squares()
+                self.draw_pieces()
+        else:
+            # piece selected previously
+            self.selectedPiece = None
+            if piece:
+                self.reset_squares()
+                square.isSelected = True
+                # temp
+                if piece.name == "Knight":
+                    moves = piece.get_possible_moves()
+                    # available moves on board
+                    movesInPlay = []
+                    for move in moves:
+                        if move[0] in range(8) and move[1] in range(8):
+                            movesInPlay.append(move)
+
+                    # valid moves on board        
+                    validMoves = []
+                    for move in movesInPlay:
+                        posSquare = self.find_square(*move)
+                        posPiece = self.find_piece(*move)
+                        if posPiece:
+                            if posPiece.color != piece.color:
+                                # enemy piece, attack
+                                posSquare.isThreat = True
+                            else:
+                                # friendly piece
+                                pass
+                        else:
+                            posSquare.isPossible = True
+                            validMoves.append(move)
+            else:
+                self.reset_squares()
+
+
+            self.draw_squares()
+            self.draw_pieces()
+            
 
     def draw_squares(self):
         for square in self.squares:
@@ -138,6 +244,12 @@ class Board:
         for piece in self.pieces:
             if piece.row == row and piece.col == col:
                 return piece
+
+    def reset_squares(self):
+        for square in self.squares:
+            square.isSelected = False
+            square.isPossible = False
+            square.isThreat = False
 
     @staticmethod
     def init_squares():
