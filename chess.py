@@ -69,11 +69,37 @@ class Piece:
 
 
 class Pawn(Piece):
-
-    hasNotMoved = True
     
     def __init__(self, row, col, color):
         super().__init__(row, col, 0x265f, color, "Pawn")
+        self.hasNotMoved = True
+
+    def get_possible_moves(self):
+        if self.color == "white":
+            # up 1, right 1
+            # up 1, left 1
+            # up 1
+            moves = [
+                (self.row - 1, self.col + 1),
+                (self.row - 1, self.col - 1),
+                (self.row - 1, self.col)
+            ]
+            if self.hasNotMoved:
+                # up 2
+                moves.append((self.row - 2, self.col))
+        else:
+            # down 1, right 1
+            # down 1, left 1
+            # down 1
+            moves = [
+                (self.row + 1, self.col + 1),
+                (self.row + 1, self.col - 1),
+                (self.row + 1, self.col)
+            ]
+            if self.hasNotMoved:
+                # down 2
+                moves.append((self.row + 2, self.col))
+        return moves
 
 
 class Rook(Piece):
@@ -123,10 +149,91 @@ class King(Piece):
     def __init__(self, row, color):
         super().__init__(row, 4, 0x265a, color, "King")
 
+    def get_possible_moves(self):
+        # up 1
+        # up 1, right 1
+        # right 1
+        # right 1, down 1
+        # down 1
+        # down 1, left 1
+        # left 1
+        # left 1, up 1
 
-class Board:
+        moves = [
+            (self.row - 1, self.col),
+            (self.row - 1, self.col + 1),
+            (self.row, self.col + 1),
+            (self.row + 1, self.col + 1),
+            (self.row + 1, self.col),
+            (self.row + 1, self.col - 1),
+            (self.row, self.col - 1),
+            (self.row - 1, self.col - 1),
+        ]
+        return moves
+
+
+class MoveValidation:
+    
+    def validate_knight(self, moves):
+        validMoves = []
+        for move in moves:
+            posSquare = self.find_square(*move)
+            posPiece = self.find_piece(*move)
+            if posPiece:
+                if posPiece.color != self.selectedPiece.color:
+                    # enemy piece, attack
+                    posSquare.isThreat = True
+                    validMoves.append(move)
+                else:
+                    # friendly piece
+                    pass
+            else:
+                posSquare.isPossible = True
+                validMoves.append(move)
+
+        return validMoves
+
+    def validate_king(self, moves):
+        validMoves = []
+        for move in moves:
+            posSquare = self.find_square(*move)
+            posPiece = self.find_piece(*move)
+            if posPiece:
+                if posPiece.color != self.selectedPiece.color:
+                    # enemy piece, attack
+                    posSquare.isThreat = True
+                    validMoves.append(move)
+                else:
+                    # friendly piece
+                    pass
+            else:
+                posSquare.isPossible = True
+                validMoves.append(move)
+        return validMoves
+
+    def validate_pawn(self, moves):
+        validMoves = []
+        for move in moves[:2]:
+            posSquare = self.find_square(*move)
+            posPiece = self.find_piece(*move)
+            if posPiece:
+                if posPiece.color != self.selectedPiece.color:
+                    # enemy piece, attack
+                    posSquare.isThreat = True
+                    validMoves.append(move)
+        for move in moves[2:]:
+            posSquare = self.find_square(*move)
+            posPiece = self.find_piece(*move)
+            if not posPiece:
+                posSquare.isPossible = True
+                validMoves.append(move)
+        return validMoves
+
+
+class Board(MoveValidation):
 
     def __init__(self, master):
+        super().__init__()
         self.canvas = tk.Canvas(master, width=600, height=600)
         self.squares = self.init_squares()
         self.pieces = self.init_pieces()
@@ -232,23 +339,19 @@ class Board:
         moves = self.selectedPiece.get_possible_moves()
         movesInPlay = self.get_moves_in_play(moves)
 
-        # valid moves on board
-        validMoves = []
-        for move in movesInPlay:
-            posSquare = self.find_square(*move)
-            posPiece = self.find_piece(*move)
-            if posPiece:
-                if posPiece.color != self.selectedPiece.color:
-                    # enemy piece, attack
-                    posSquare.isThreat = True
-                    validMoves.append(move)
-                else:
-                    # friendly piece
-                    pass
-            else:
-                posSquare.isPossible = True
-                validMoves.append(move)
+        validate_func = None
+        if self.selectedPiece.name == "Knight":
+            validate_func = self.validate_knight
+        elif self.selectedPiece.name == "King":
+            validate_func = self.validate_king
+        elif self.selectedPiece.name == "Pawn":
+            validate_func = self.validate_pawn
 
+        if not validate_func:
+            validMoves = []
+        else:
+            validMoves = validate_func(movesInPlay)
+        
         return validMoves
 
     def remove_piece(self, piece):
@@ -256,6 +359,8 @@ class Board:
         self.pieces.pop(pieceId)
 
     def move_piece(self, row, col):
+        if self.selectedPiece.name == "Pawn":
+            self.selectedPiece.hasNotMoved = False
         self.selectedPiece.row = row
         self.selectedPiece.col = col
         self.selectedPiece = None
