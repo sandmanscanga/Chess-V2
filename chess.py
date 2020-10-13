@@ -238,7 +238,6 @@ class Board(MoveValidation):
         self.squares = self.init_squares()
         self.pieces = self.init_pieces()
         self.selectedPiece = None
-        self.pieces.append(King(4, "white"))
         self.draw_squares()
         self.draw_pieces()
         self.canvas.bind("<Button-1>", self.left_click)
