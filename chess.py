@@ -15,7 +15,7 @@ class Square:
     colors = ("#212121", "#bdbdbd")
     selectedColor = "#ffeb3b" # Gold
     possibleColor = "#26c6da" # Cyan
-    threatColor = "#c62828" # red
+    threatColor = "#c62828" # Red
     isSelected = False
     isPossible = False
     isThreat = False
@@ -139,18 +139,8 @@ class Board:
         self.canvas.pack()
 
     def left_click(self, event):
-        """
-            Nothing is primed
-                1. Click square with no piece (deselect)
-                2. Click piece (select)
+        self.reset_squares()
 
-            Board is primed
-                1. Click square with no piece (deselect)
-                2. Click primed piece (deselect)
-                3. Click unprimed piece (reselect)
-                4. Click possible move (move piece, deselect)
-                5. Click opponent piece (move piece, deselect, remove opponent piece)
-        """
         row = event.y // Square.length
         col = event.x // Square.length
 
@@ -165,17 +155,15 @@ class Board:
             "vailidMoves": str(self.validMoves)
         }, indent=2))
 
-        # No piece selected previously
+        # no piece selected previously
         if not self.selectedPiece:
             if piece:
                 # a piece was clicked, selecting
-                self.reset_squares()
                 square.isSelected = True
                 self.selectedPiece = piece
                 self.validMoves = self.get_valid_moves()
             else:
                 # square clicked, deselecting
-                self.reset_squares()
                 self.selectedPiece = None
                 self.validMoves = []
         else:
@@ -183,7 +171,6 @@ class Board:
             if piece:
                 if self.selectedPiece.color == piece.color:
                     # another piece on same team selected (reselect)
-                    self.reset_squares()
                     square.isSelected = True
                     self.selectedPiece = piece
                     self.validMoves = self.get_valid_moves()
@@ -191,13 +178,10 @@ class Board:
                     # enemy piece was clicked
                     if (row, col) in self.validMoves:
                         # enemy piece is captured
-                        self.reset_squares()
-                        if self.selectedPiece.name == "Knight":
-                            self.move_piece(row, col)
-                            self.remove_piece(piece)
+                        self.move_piece(row, col)
+                        self.remove_piece(piece)
                     else:
                         # enemy piece is new selection
-                        self.reset_squares()
                         square.isSelected = True
                         self.selectedPiece = piece
                         self.validMoves = self.get_valid_moves()
@@ -205,12 +189,9 @@ class Board:
                 # a square was clicked
                 if (row, col) in self.validMoves:
                     # square is valid, moving piece
-                    self.reset_squares()
-                    if self.selectedPiece.name == "Knight":
-                        self.move_piece(row, col)
+                    self.move_piece(row, col)
                 else:
                     # square is invalid, deselect
-                    self.reset_squares()
                     self.selectedPiece = None
                     self.validMoves = []
 
