@@ -126,17 +126,29 @@ class King(Piece):
 
 class Board:
 
-    selectedPiece = None
-    validMoves = []
-
     def __init__(self, master):
         self.canvas = tk.Canvas(master, width=600, height=600)
         self.squares = self.init_squares()
         self.pieces = self.init_pieces()
+        self.selectedPiece = None
         self.draw_squares()
         self.draw_pieces()
         self.canvas.bind("<Button-1>", self.left_click)
         self.canvas.pack()
+
+    @property
+    def selectedPiece(self):
+        return self.__selectedPiece
+
+    @selectedPiece.setter
+    def selectedPiece(self, piece):
+        if piece:
+            self.square.isSelected = True
+            self.__selectedPiece = piece
+            self.validMoves = self.get_valid_moves()
+        else:
+            self.__selectedPiece = None
+            self.validMoves = []
 
     def left_click(self, event):
         self.reset_squares()
@@ -144,47 +156,40 @@ class Board:
         row = event.y // Square.length
         col = event.x // Square.length
 
-        square = self.find_square(row, col)
-        piece = self.find_piece(row, col)
+        self.square = self.find_square(row, col)
+        self.piece = self.find_piece(row, col)
 
         # log the board state
         print(json.dumps({
-            "square": str(square),
-            "piece": str(piece),
+            "square": str(self.square),
+            "piece": str(self.piece),
             "selectedPiece": str(self.selectedPiece),
             "vailidMoves": str(self.validMoves)
         }, indent=2))
 
         # no piece selected previously
         if not self.selectedPiece:
-            if piece:
+            if self.piece:
                 # a piece was clicked, selecting
-                square.isSelected = True
-                self.selectedPiece = piece
-                self.validMoves = self.get_valid_moves()
+                self.selectedPiece = self.piece
             else:
                 # square clicked, deselecting
                 self.selectedPiece = None
-                self.validMoves = []
         else:
             # piece selected previously
-            if piece:
-                if self.selectedPiece.color == piece.color:
+            if self.piece:
+                if self.selectedPiece.color == self.piece.color:
                     # another piece on same team selected (reselect)
-                    square.isSelected = True
-                    self.selectedPiece = piece
-                    self.validMoves = self.get_valid_moves()
+                    self.selectedPiece = self.piece
                 else:
                     # enemy piece was clicked
                     if (row, col) in self.validMoves:
                         # enemy piece is captured
                         self.move_piece(row, col)
-                        self.remove_piece(piece)
+                        self.remove_piece(self.piece)
                     else:
                         # enemy piece is new selection
-                        square.isSelected = True
-                        self.selectedPiece = piece
-                        self.validMoves = self.get_valid_moves()
+                        self.selectedPiece = self.piece
             else:
                 # a square was clicked
                 if (row, col) in self.validMoves:
@@ -193,7 +198,6 @@ class Board:
                 else:
                     # square is invalid, deselect
                     self.selectedPiece = None
-                    self.validMoves = []
 
         # redraw updated board
         self.draw_squares()
