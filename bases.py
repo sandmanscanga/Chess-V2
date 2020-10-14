@@ -65,6 +65,12 @@ class Piece:
     def get_possible_moves(self):
         return []
 
+    @staticmethod
+    def gen_moves_in_play(moves):
+        for move in moves:
+            if move[0] in range(8) and move[1] in range(8):
+                yield move
+
 
 class MoveValidation:
 
@@ -92,11 +98,29 @@ class MoveValidation:
                 break
         return validMoves
 
+    def validate_rook(self):
+        moves = self.selectedPiece.get_possible_moves()       
+
+        validMoves = []
+        for _moves in moves.values():
+            for move in _moves:
+                posSquare = self.find_square(*move)
+                posPiece = self.find_piece(*move)
+                if posPiece:
+                    if posPiece.color != self.selectedPiece.color:
+                        # enemy piece
+                        posSquare.isThreat = True
+                        validMoves.append(move)
+                    break    
+                else:
+                    posSquare.isPossible = True
+                    validMoves.append(move)
+        return validMoves
+
     def validate_knight(self):
         moves = self.selectedPiece.get_possible_moves()
-        movesInPlay = self.get_moves_in_play(moves)
         validMoves = []
-        for move in movesInPlay:
+        for move in moves:
             posSquare = self.find_square(*move)
             posPiece = self.find_piece(*move)
             if posPiece:
@@ -113,11 +137,48 @@ class MoveValidation:
 
         return validMoves
 
+    def validate_bishop(self):
+        moves = self.selectedPiece.get_possible_moves()       
+
+        validMoves = []
+        for _moves in moves.values():
+            for move in _moves:
+                posSquare = self.find_square(*move)
+                posPiece = self.find_piece(*move)
+                if posPiece:
+                    if posPiece.color != self.selectedPiece.color:
+                        # enemy piece
+                        posSquare.isThreat = True
+                        validMoves.append(move)
+                    break    
+                else:
+                    posSquare.isPossible = True
+                    validMoves.append(move)
+        return validMoves
+
+    def validate_queen(self):
+        moves = self.selectedPiece.get_possible_moves()       
+
+        validMoves = []
+        for _moves in moves.values():
+            for move in _moves:
+                posSquare = self.find_square(*move)
+                posPiece = self.find_piece(*move)
+                if posPiece:
+                    if posPiece.color != self.selectedPiece.color:
+                        # enemy piece
+                        posSquare.isThreat = True
+                        validMoves.append(move)
+                    break    
+                else:
+                    posSquare.isPossible = True
+                    validMoves.append(move)
+        return validMoves
+
     def validate_king(self):
         moves = self.selectedPiece.get_possible_moves()
-        movesInPlay = self.get_moves_in_play(moves)
         validMoves = []
-        for move in movesInPlay:
+        for move in moves:
             posSquare = self.find_square(*move)
             posPiece = self.find_piece(*move)
             if posPiece:

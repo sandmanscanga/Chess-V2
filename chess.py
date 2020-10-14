@@ -104,7 +104,6 @@ class Board(MoveValidation):
             square.isThreat = False
 
     def get_valid_moves(self):
-
         validate_func = None
         if self.selectedPiece.name == "Knight":
             validate_func = self.validate_knight
@@ -112,12 +111,16 @@ class Board(MoveValidation):
             validate_func = self.validate_king
         elif self.selectedPiece.name == "Pawn":
             validate_func = self.validate_pawn
-
-        if not validate_func:
-            validMoves = []
+        elif self.selectedPiece.name == "Queen":
+            validate_func = self.validate_queen
+        elif self.selectedPiece.name == "Rook":
+            validate_func = self.validate_rook
+        elif self.selectedPiece.name == "Bishop":
+            validate_func = self.validate_bishop
         else:
-            validMoves = validate_func()
-        
+            raise Exception("Unidentified piece.")
+
+        validMoves = validate_func()
         return validMoves
 
     def remove_piece(self, piece):
@@ -173,15 +176,6 @@ class Board(MoveValidation):
 
                     pieces.append(piece)
         return pieces
-
-    @staticmethod
-    def get_moves_in_play(moves):
-        # get rid of this later
-        movesInPlay = []
-        for move in moves:
-            if move[0] in range(8) and move[1] in range(8):
-                movesInPlay.append(move)
-        return movesInPlay
 
 
 def main():
