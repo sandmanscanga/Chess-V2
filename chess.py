@@ -40,13 +40,7 @@ class Board(MoveValidation):
         self.square = self.find_square(row, col)
         self.piece = self.find_piece(row, col)
 
-        # log the board state
-        print(json.dumps({
-            "square": str(self.square),
-            "piece": str(self.piece),
-            "selectedPiece": str(self.selectedPiece),
-            "vailidMoves": str(self.validMoves)
-        }, indent=2))
+        self.display()
 
         # no piece selected previously
         if not self.selectedPiece:
@@ -110,8 +104,6 @@ class Board(MoveValidation):
             square.isThreat = False
 
     def get_valid_moves(self):
-        moves = self.selectedPiece.get_possible_moves()
-        movesInPlay = self.get_moves_in_play(moves)
 
         validate_func = None
         if self.selectedPiece.name == "Knight":
@@ -124,7 +116,7 @@ class Board(MoveValidation):
         if not validate_func:
             validMoves = []
         else:
-            validMoves = validate_func(movesInPlay)
+            validMoves = validate_func()
         
         return validMoves
 
@@ -139,6 +131,14 @@ class Board(MoveValidation):
         self.selectedPiece.col = col
         self.selectedPiece = None
         self.validMoves = []
+
+    def display(self):
+        print(json.dumps({
+            "square": str(self.square),
+            "piece": str(self.piece),
+            "selectedPiece": str(self.selectedPiece),
+            "vailidMoves": str(self.validMoves)
+        }, indent=2))
 
     @staticmethod
     def init_squares():
@@ -176,6 +176,7 @@ class Board(MoveValidation):
 
     @staticmethod
     def get_moves_in_play(moves):
+        # get rid of this later
         movesInPlay = []
         for move in moves:
             if move[0] in range(8) and move[1] in range(8):

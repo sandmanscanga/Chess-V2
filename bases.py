@@ -67,10 +67,14 @@ class Piece:
 
 
 class MoveValidation:
-    
-    def validate_knight(self, moves):
+
+    def validate_pawn(self):
+        moves = self.selectedPiece.get_possible_moves()
+        diagonals = moves.get("diagonals")
+        straight = moves.get("straight")
+
         validMoves = []
-        for move in moves:
+        for move in diagonals:
             posSquare = self.find_square(*move)
             posPiece = self.find_piece(*move)
             if posPiece:
@@ -78,44 +82,7 @@ class MoveValidation:
                     # enemy piece, attack
                     posSquare.isThreat = True
                     validMoves.append(move)
-                else:
-                    # friendly piece
-                    pass
-            else:
-                posSquare.isPossible = True
-                validMoves.append(move)
-
-        return validMoves
-
-    def validate_king(self, moves):
-        validMoves = []
-        for move in moves:
-            posSquare = self.find_square(*move)
-            posPiece = self.find_piece(*move)
-            if posPiece:
-                if posPiece.color != self.selectedPiece.color:
-                    # enemy piece, attack
-                    posSquare.isThreat = True
-                    validMoves.append(move)
-                else:
-                    # friendly piece
-                    pass
-            else:
-                posSquare.isPossible = True
-                validMoves.append(move)
-        return validMoves
-
-    def validate_pawn(self, moves):
-        validMoves = []
-        for move in moves[:2]:
-            posSquare = self.find_square(*move)
-            posPiece = self.find_piece(*move)
-            if posPiece:
-                if posPiece.color != self.selectedPiece.color:
-                    # enemy piece, attack
-                    posSquare.isThreat = True
-                    validMoves.append(move)
-        for move in moves[2:]:
+        for move in straight:
             posSquare = self.find_square(*move)
             posPiece = self.find_piece(*move)
             if not posPiece:
@@ -123,4 +90,45 @@ class MoveValidation:
                 validMoves.append(move)
             else:
                 break
+        return validMoves
+
+    def validate_knight(self):
+        moves = self.selectedPiece.get_possible_moves()
+        movesInPlay = self.get_moves_in_play(moves)
+        validMoves = []
+        for move in movesInPlay:
+            posSquare = self.find_square(*move)
+            posPiece = self.find_piece(*move)
+            if posPiece:
+                if posPiece.color != self.selectedPiece.color:
+                    # enemy piece, attack
+                    posSquare.isThreat = True
+                    validMoves.append(move)
+                else:
+                    # friendly piece
+                    pass
+            else:
+                posSquare.isPossible = True
+                validMoves.append(move)
+
+        return validMoves
+
+    def validate_king(self):
+        moves = self.selectedPiece.get_possible_moves()
+        movesInPlay = self.get_moves_in_play(moves)
+        validMoves = []
+        for move in movesInPlay:
+            posSquare = self.find_square(*move)
+            posPiece = self.find_piece(*move)
+            if posPiece:
+                if posPiece.color != self.selectedPiece.color:
+                    # enemy piece, attack
+                    posSquare.isThreat = True
+                    validMoves.append(move)
+                else:
+                    # friendly piece
+                    pass
+            else:
+                posSquare.isPossible = True
+                validMoves.append(move)
         return validMoves

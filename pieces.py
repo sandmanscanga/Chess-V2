@@ -9,29 +9,36 @@ class Pawn(Piece):
 
     def get_possible_moves(self):
         if self.color == "white":
-            # up 1, right 1
-            # up 1, left 1
-            # up 1
-            moves = [
+            _diagonals = [
                 (self.row - 1, self.col + 1),
-                (self.row - 1, self.col - 1),
-                (self.row - 1, self.col)
+                (self.row - 1, self.col - 1)
             ]
+            _straight = [(self.row - 1, self.col)]
             if self.hasNotMoved:
-                # up 2
-                moves.append((self.row - 2, self.col))
+                _straight.append((self.row - 2, self.col))
         else:
-            # down 1, right 1
-            # down 1, left 1
-            # down 1
-            moves = [
+            _diagonals = [
                 (self.row + 1, self.col + 1),
-                (self.row + 1, self.col - 1),
-                (self.row + 1, self.col)
+                (self.row + 1, self.col - 1)
             ]
+            _straight = [(self.row + 1, self.col)]
             if self.hasNotMoved:
-                # down 2
-                moves.append((self.row + 2, self.col))
+                _straight.append((self.row + 2, self.col))
+        
+        diagonals = []
+        for move in _diagonals:
+            if move[0] in range(8) and move[1] in range(8):
+                diagonals.append(move)
+        
+        straight = []
+        for move in _straight:
+            if move[0] in range(8) and move[1] in range(8):
+                straight.append(move)
+
+        moves = {
+            "diagonals": diagonals,
+            "straight": straight
+        }
         return moves
 
 
@@ -55,7 +62,7 @@ class Knight(Piece):
         # down 2 left 1, 
         # left 2 down 1, 
         # left 2 up 1
-        moves = [
+        _moves = [
             (self.row - 2, self.col - 1),
             (self.row - 2, self.col + 1),
             (self.row - 1, self.col + 2),
@@ -65,6 +72,10 @@ class Knight(Piece):
             (self.row + 1, self.col - 2),
             (self.row - 1, self.col - 2),
         ]
+        moves = []
+        for move in _moves:
+            if move[0] in range(8) and move[1] in range(8):
+                moves.append(move)
         return moves
 
 class Bishop(Piece):
@@ -92,7 +103,7 @@ class King(Piece):
         # left 1
         # left 1, up 1
 
-        moves = [
+        _moves = [
             (self.row - 1, self.col),
             (self.row - 1, self.col + 1),
             (self.row, self.col + 1),
@@ -102,4 +113,8 @@ class King(Piece):
             (self.row, self.col - 1),
             (self.row - 1, self.col - 1),
         ]
+        moves = []
+        for move in _moves:
+            if move[0] in range(8) and move[1] in range(8):
+                moves.append(move)
         return moves
