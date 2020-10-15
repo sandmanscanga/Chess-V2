@@ -6,9 +6,16 @@ from pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 class Board(MoveValidation):
 
+    turn = 0
+
+    @classmethod
+    def inc_turn(cls):
+        cls.turn += 1
+
     def __init__(self, master):
         super().__init__()
-        self.canvas = tk.Canvas(master, width=600, height=600)
+        self.master = master
+        self.canvas = tk.Canvas(self.master, width=600, height=605)
         self.squares = self.init_squares()
         self.pieces = self.init_pieces()
         self.selectedPiece = None
@@ -16,6 +23,8 @@ class Board(MoveValidation):
         self.draw_pieces()
         self.canvas.bind("<Button-1>", self.left_click)
         self.canvas.pack()
+        self.label = tk.Label(self.master, text=self.turnColor)
+        self.label.pack()
 
     @property
     def selectedPiece(self):
@@ -30,6 +39,11 @@ class Board(MoveValidation):
         else:
             self.__selectedPiece = None
             self.validMoves = []
+
+    @property
+    def turnColor(self):
+        return "white" if not self.turn % 2 else "black"
+    
 
     def left_click(self, event):
         self.reset_squares()
@@ -46,13 +60,19 @@ class Board(MoveValidation):
         if not self.selectedPiece:
             if self.piece:
                 # a piece was clicked, selecting
-                self.selectedPiece = self.piece
+                if self.turnColor == self.piece.color:
+                    # correct color chosen based on turn color
+                    self.selectedPiece = self.piece
+                else:
+                    # incorrect color chosen based on turn color
+                    print(f"It's {self.turnColor}'s turn!")
             else:
                 # square clicked, deselecting
                 self.selectedPiece = None
         else:
             # piece selected previously
             if self.piece:
+                # a piece was clicked
                 if self.selectedPiece.color == self.piece.color:
                     # another piece on same team selected (reselect)
                     self.selectedPiece = self.piece
@@ -63,8 +83,8 @@ class Board(MoveValidation):
                         self.move_piece(row, col)
                         self.remove_piece(self.piece)
                     else:
-                        # enemy piece is new selection
-                        self.selectedPiece = self.piece
+                        # enemy piece is clicked, deselect
+                        self.selectedPiece = None
             else:
                 # a square was clicked
                 if (row, col) in self.validMoves:
@@ -77,6 +97,9 @@ class Board(MoveValidation):
         # redraw updated board
         self.draw_squares()
         self.draw_pieces()
+        self.label.destroy()
+        self.label = tk.Label(self.master, text=self.turnColor)
+        self.label.pack()
             
 
     def draw_squares(self):
@@ -134,13 +157,15 @@ class Board(MoveValidation):
         self.selectedPiece.col = col
         self.selectedPiece = None
         self.validMoves = []
+        Board.inc_turn()
 
     def display(self):
         print(json.dumps({
             "square": str(self.square),
             "piece": str(self.piece),
             "selectedPiece": str(self.selectedPiece),
-            "vailidMoves": str(self.validMoves)
+            "vailidMoves": str(self.validMoves),
+            "turn": str(self.turn),
         }, indent=2))
 
     @staticmethod
