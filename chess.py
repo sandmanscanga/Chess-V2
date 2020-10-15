@@ -14,7 +14,8 @@ class Board(MoveValidation):
 
     def __init__(self, master):
         super().__init__()
-        self.canvas = tk.Canvas(master, width=600, height=600)
+        self.master = master
+        self.canvas = tk.Canvas(self.master, width=600, height=605)
         self.squares = self.init_squares()
         self.pieces = self.init_pieces()
         self.selectedPiece = None
@@ -22,7 +23,8 @@ class Board(MoveValidation):
         self.draw_pieces()
         self.canvas.bind("<Button-1>", self.left_click)
         self.canvas.pack()
-        label = tk.Label()
+        self.label = tk.Label(self.master, text=self.turnColor)
+        self.label.pack()
 
     @property
     def selectedPiece(self):
@@ -95,6 +97,9 @@ class Board(MoveValidation):
         # redraw updated board
         self.draw_squares()
         self.draw_pieces()
+        self.label.destroy()
+        self.label = tk.Label(self.master, text=self.turnColor)
+        self.label.pack()
             
 
     def draw_squares(self):
