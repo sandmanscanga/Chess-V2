@@ -205,6 +205,8 @@ class Board(MoveValidation):
 
 def main():
     root = tk.Tk()
+    root.title('Chess V2')
+    root.resizable(width=False, height=False)
     Board(root)
     root.mainloop()
 
