@@ -6,9 +6,13 @@
 ```bash
 python3 chess.py
 ```
-# 
+
+--- 
+
 [![chessImage](chessImage.png)](https://github.com/sandmanscanga/Chess-V2)
-# 
+
+---
+
 ## Credits:
 
 ### [Adam Scanga](https://github.com/sandmanscanga) 
