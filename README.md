@@ -9,7 +9,7 @@ python3 chess.py
 
 --- 
 
-[![chessImage](chessImage.png)](https://github.com/sandmanscanga/Chess-V2)
+[![chessImage](assets/chessImage.png)](https://github.com/sandmanscanga/Chess-V2)
 
 ---
 
