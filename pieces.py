@@ -1,4 +1,4 @@
-from .bases import Piece
+from bases import Piece
 
 
 class Pawn(Piece):
