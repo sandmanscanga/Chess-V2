@@ -1,7 +1,7 @@
 import tkinter as tk
 import json
-from bases import Square, Piece, MoveValidation
-from pieces import Pawn, Rook, Knight, Bishop, Queen, King
+from utils.bases import Square, Piece, MoveValidation
+from utils.pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 
 class Board(MoveValidation):
@@ -23,7 +23,7 @@ class Board(MoveValidation):
         self.draw_pieces()
         self.canvas.bind("<Button-1>", self.left_click)
         self.canvas.pack()
-        self.label = tk.Label(self.master, text=self.turnColor)
+        self.label = tk.Label(self.master, text=self.turnColor.title(), fg="red")
         self.label.pack()
 
     @property
@@ -98,7 +98,7 @@ class Board(MoveValidation):
         self.draw_squares()
         self.draw_pieces()
         self.label.destroy()
-        self.label = tk.Label(self.master, text=self.turnColor)
+        self.label = tk.Label(self.master, text=self.turnColor.title(), fg="red")
         self.label.pack()
             
 
@@ -205,6 +205,8 @@ class Board(MoveValidation):
 
 def main():
     root = tk.Tk()
+    root.title('Chess V2')
+    root.resizable(width=False, height=False)
     Board(root)
     root.mainloop()
 
