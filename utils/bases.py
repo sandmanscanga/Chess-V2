@@ -1,11 +1,5 @@
 import sys
 
-## Cross-Platform Compatibility
-if sys.platform == "linux":
-    piece_size = 56
-else:
-    piece_size = 36
-
 
 class Square:
 
@@ -18,18 +12,41 @@ class Square:
     isPossible = False
     isThreat = False
 
+    @classmethod
+    def update_length(cls, length):
+        cls.length = int(length)
+
     def __init__(self, row, col):
         (self.row, self.col) = (row, col)
         color_id = (self.row + self.col) % 2
         self.color = self.colors[color_id]
-        x1 = self.length * self.col
-        y1 = self.length * self.row
-        x2 = self.length + x1
-        y2 = self.length + y1
-        self.coords = (x1, y1, x2, y2)
 
     def __str__(self):
-        return f"(Square [{self.row}, {self.col}])"
+        return self.position + str(Square.length)
+
+    @property
+    def position(self):
+        return "ABCDEFGH"[self.col] + str(self.row + 1)
+
+    @property
+    def x1(self):
+        return self.length * self.col
+
+    @property
+    def y1(self):
+        return self.length * self.row
+
+    @property
+    def x2(self):
+        return self.length + self.x1
+
+    @property
+    def y2(self):
+        return self.length + self.y1
+
+    @property
+    def coords(self):
+        return (self.x1, self.y1, self.x2, self.y2)    
 
     def draw(self, canvas):
         if self.isSelected:
@@ -46,6 +63,11 @@ class Piece:
     
     white = "white"
     black = "black"
+    squareLength = Square.length
+
+    @classmethod
+    def update_square_length(cls, length):
+        cls.squareLength = length
 
     def __init__(self, row, col, char, color, name):
         (self.row, self.col) = (row, col)
@@ -54,16 +76,28 @@ class Piece:
         self.name = name
 
     def __str__(self):
-        return f"({self.name} [{self.row}, {self.col}] {self.color})"
+        return f"({self.name}, {self.position})"
+
+    @property
+    def position(self):
+        return "ABCDEFGH"[self.col] + str(self.row + 1)
 
     def draw(self, canvas):
-        x = (Square.length * self.col) + (Square.length / 2) 
-        y = (Square.length * self.row) + (Square.length / 2)
+        piece_size = self.get_piece_size()
+        x = (Square.length * self.col) + (self.squareLength / 2) 
+        y = (Square.length * self.row) + (self.squareLength / 2)
         canvas.create_text(x, y, text=self.char, 
             fill=self.color, font=("", piece_size))
 
     def get_possible_moves(self):
         return []
+
+    def get_piece_size(self):
+        if sys.platform == "linux":
+            piece_size = int(self.squareLength * 0.74667) # 74.667% of 75 is 56
+        else:
+            piece_size = int(self.squareLength * 0.48) # 48% of 75 is 36
+        return piece_size
 
     @staticmethod
     def gen_moves_in_play(moves):

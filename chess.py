@@ -1,30 +1,45 @@
 import tkinter as tk
 import json
+import sys
 from utils.bases import Square, Piece, MoveValidation
 from utils.pieces import Pawn, Rook, Knight, Bishop, Queen, King
+
+if sys.platform == "linux":
+    window_arg = "-zoomed"
+else:
+    window_arg = "-fullscreen"
 
 
 class Board(MoveValidation):
 
     turn = 0
+    boardSize = 600
 
     @classmethod
     def inc_turn(cls):
         cls.turn += 1
 
+    @classmethod
+    def update_board_size(cls, size):
+        cls.boardSize = size
+
     def __init__(self, master):
         super().__init__()
         self.master = master
-        self.canvas = tk.Canvas(self.master, width=600, height=605)
+        self.canvas = tk.Canvas(self.master,
+            width=self.boardSize, height=self.boardSize)
+        Square.update_length(self.boardSize / 8)
+        Piece.update_square_length(Square.length)
         self.squares = self.init_squares()
         self.pieces = self.init_pieces()
         self.selectedPiece = None
         self.draw_squares()
         self.draw_pieces()
         self.canvas.bind("<Button-1>", self.left_click)
+        self.canvas.bind("<Configure>", self.on_resize)
         self.canvas.pack()
-        self.label = tk.Label(self.master, text=self.turnColor.title(), fg="red")
-        self.label.pack()
+        # self.label = tk.Label(self.master, text=self.turnColor.title(), fg="red")
+        # self.label.pack()
 
     @property
     def selectedPiece(self):
@@ -97,10 +112,23 @@ class Board(MoveValidation):
         # redraw updated board
         self.draw_squares()
         self.draw_pieces()
-        self.label.destroy()
-        self.label = tk.Label(self.master, text=self.turnColor.title(), fg="red")
-        self.label.pack()
+        # self.label.destroy()
+        # self.label = tk.Label(self.master, text=self.turnColor.title(), fg="red")
+        # self.label.pack()
             
+    def on_resize(self, event):
+        # (width, height) = (event.width, event.height)
+        width = self.master.winfo_width()
+        height = self.master.winfo_height()
+        newSize = width if width < height else height
+        # Board.update_board_size(newSize - 4)
+        self.boardSize = newSize - (newSize % 8)
+        self.master.geometry(f"{self.boardSize}x{self.boardSize}")
+        self.canvas.config(width=self.boardSize, height=self.boardSize)
+        Square.update_length(self.boardSize / 8)
+        Piece.update_square_length(Square.length)
+        self.draw_squares()
+        self.draw_pieces()
 
     def draw_squares(self):
         for square in self.squares:
@@ -166,6 +194,8 @@ class Board(MoveValidation):
             "selectedPiece": str(self.selectedPiece),
             "vailidMoves": str(self.validMoves),
             "turn": str(self.turn),
+            "squareLength": self.square.length if self.square else None,
+            "pieceSize": self.piece.get_piece_size() if self.piece else None
         }, indent=2))
 
     @staticmethod
@@ -203,12 +233,54 @@ class Board(MoveValidation):
         return pieces
 
 
+"""class ResizingCanvas(Canvas):
+    def __init__(self,parent,**kwargs):
+        Canvas.__init__(self,parent,**kwargs)
+        self.bind("<Configure>", self.on_resize)
+        self.height = self.winfo_reqheight()
+        self.width = self.winfo_reqwidth()
+
+    def on_resize(self,event):
+        # determine the ratio of old width/height to new width/height
+        wscale = float(event.width)/self.width
+        hscale = float(event.height)/self.height
+        self.width = event.width
+        self.height = event.height
+        # resize the canvas 
+        self.config(width=self.width, height=self.height)
+        # rescale all the objects tagged with the "all" tag
+        self.scale("all",0,0,wscale,hscale)"""
+
+
+class App(tk.Tk):
+    
+    def __init__(self):
+        super().__init__()
+        self.title('Chess V2')
+        w = self.winfo_screenwidth()
+        h = self.winfo_screenheight()
+        # self.geometry(f"{w}x{h}")
+        self.fullscreenState = False
+        self.attributes(window_arg, self.fullscreenState)
+        self.bind("<F11>", self.toggle_fullscreen)
+        self.bind("<Escape>", self.exit_fullscreen)
+        # self.bind("<Configure>", lambda e:print(f"on resize: {event.width}, {event.height}"))
+        self.board = Board(self)
+        self.mainloop()
+
+    def toggle_fullscreen(self, event):
+        self.fullscreenState = not self.fullscreenState
+        self.attributes(window_arg, self.fullscreenState)
+
+    def exit_fullscreen(self, event):
+        self.attributes(window_arg, False)
+
+    def on_resize(self, event):
+        print(f"on resize: {event.width}, {event.height}")
+
+
 def main():
-    root = tk.Tk()
-    root.title('Chess V2')
-    root.resizable(width=False, height=False)
-    Board(root)
-    root.mainloop()
+    App()
 
 
 if __name__ == "__main__":

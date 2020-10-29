@@ -1,4 +1,5 @@
 # Chess-V2
+
 ### A simple Chess game made with Python3
 
 ## Usage:
@@ -15,5 +16,5 @@ python3 chess.py
 
 ## Credits:
 
-### [Adam Scanga](https://github.com/sandmanscanga) 
+### [Adam Scanga](https://github.com/sandmanscanga)
 ### [Curtis Lane](https://github.com/CurtisLane)
