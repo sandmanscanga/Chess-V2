@@ -1,0 +1,7 @@
+
+Alternates white then black, team managed by even/odd index position
+P,B7>B5
+pawn at B7 moves to B5
+
+P,A4/B5
+pawn at A4 moves to B5 and takes a piece
