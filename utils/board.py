@@ -1,8 +1,8 @@
 import tkinter as tk
 import json
 
-from .bases import Square, Piece, MoveValidation
-from .pieces import Pawn, Rook, Knight, Bishop, Queen, King
+from utils.bases import Square, Piece, MoveValidation
+from utils.pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 
 class Board(MoveValidation):
@@ -52,7 +52,7 @@ class Board(MoveValidation):
     @property
     def turnColor(self):
         return "white" if not self.turn % 2 else "black"
-    
+
 
     def left_click(self, event):
         self.reset_squares()
@@ -112,7 +112,7 @@ class Board(MoveValidation):
         # self.label = tk.Label(self.master, text=self.turnColor.title(), fg="red")
         # self.label.pack()
             
-    def on_resize(self, event):
+    def on_resize(self, _):
         width = self.master.winfo_width()
         height = self.master.winfo_height()
         newSize = width if width < height else height
