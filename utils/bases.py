@@ -1,76 +1,98 @@
+"""Module contains square and piece logic"""
 import sys
 
 
 class Square:
+    """Contains logic and properties for square"""
 
     length = 75
-    colors = ("#212121", "#bdbdbd")
-    selectedColor = "#ffeb3b" # Gold
-    possibleColor = "#26c6da" # Cyan
-    threatColor = "#c62828" # Red
-    isSelected = False
-    isPossible = False
-    isThreat = False
+    colors = ("#455a64", "#bdbdbd")  # dark blue/grey, light grey
+    selectedColor = "#ffff00"  # Gold
+    possibleColor = "#00e000"  # Green
+    threatColor = "#c62828"  # Red
+
 
     @classmethod
     def update_length(cls, length):
+        """Updates square length based on input"""
+
         cls.length = int(length)
 
     def __init__(self, row, col):
         (self.row, self.col) = (row, col)
-        color_id = (self.row + self.col) % 2
-        self.color = self.colors[color_id]
+        self.color = self.colors[(self.row + self.col) % 2]
+        self.is_selected = False
+        self.is_possible = False
+        self.is_threat = False
 
     def __str__(self):
-        return self.position + str(Square.length)
+        return self.position + str(self.length)
 
     @property
     def position(self):
+        """Property for square position"""
+
         return "ABCDEFGH"[self.col] + str(self.row + 1)
 
     @property
-    def x1(self):
+    def x_1(self):
+        """Top left x coordinate for square"""
+
         return self.length * self.col
 
     @property
-    def y1(self):
+    def y_1(self):
+        """Top left y coordinate for square"""
+
         return self.length * self.row
 
     @property
-    def x2(self):
-        return self.length + self.x1
+    def x_2(self):
+        """Bottom right x coordinate for square"""
+
+        return self.length + self.x_1
 
     @property
-    def y2(self):
-        return self.length + self.y1
+    def y_2(self):
+        """Bottom right y coordinate for square"""
+
+        return self.length + self.y_1
 
     @property
     def coords(self):
-        return (self.x1, self.y1, self.x2, self.y2)    
+        """Compiled all corners into coordinates"""
+
+        return (self.x_1, self.y_1, self.x_2, self.y_2)
 
     def draw(self, canvas):
-        if self.isSelected:
+        """Draw square to canvas"""
+
+        if self.is_selected:
             canvas.create_rectangle(*self.coords, fill=self.selectedColor)
-        elif self.isPossible:
+        elif self.is_possible:
             canvas.create_rectangle(*self.coords, fill=self.possibleColor)
-        elif self.isThreat:
+        elif self.is_threat:
             canvas.create_rectangle(*self.coords, fill=self.threatColor)
         else:
             canvas.create_rectangle(*self.coords, fill=self.color)
 
+    def reset_state(self):
+        """Reset state of square"""
+
+        self.is_threat = False
+        self.is_possible = False
+        self.is_selected = False
+
 
 class Piece:
-    
+    """Contains logic and properties for piece"""
+
     white = "white"
     black = "black"
-    squareLength = Square.length
 
-    @classmethod
-    def update_square_length(cls, length):
-        cls.squareLength = length
-
-    def __init__(self, row, col, char, color, name):
+    def __init__(self, row, col, *args):
         (self.row, self.col) = (row, col)
+        (char, color, name) = args
         self.char = chr(char)
         self.color = color
         self.name = name
@@ -80,150 +102,35 @@ class Piece:
 
     @property
     def position(self):
+        """Property for piece position"""
+
         return "ABCDEFGH"[self.col] + str(self.row + 1)
 
     def draw(self, canvas):
-        piece_size = self.get_piece_size()
-        x = (Square.length * self.col) + (self.squareLength / 2) 
-        y = (Square.length * self.row) + (self.squareLength / 2)
-        canvas.create_text(x, y, text=self.char, 
-            fill=self.color, font=("", piece_size))
+        """Draw piece to canvas"""
 
-    def get_possible_moves(self):
-        return []
-
-    def get_piece_size(self):
-        if sys.platform == "linux":
-            piece_size = int(self.squareLength * 0.74667) # 74.667% of 75 is 56
-        else:
-            piece_size = int(self.squareLength * 0.48) # 48% of 75 is 36
-        return piece_size
+        font_size = self.get_font_size()
+        x_pos = (Square.length * self.col) + (Square.length / 2)
+        y_pos = (Square.length * self.row) + (Square.length / 2)
+        canvas.create_text(x_pos, y_pos, text=self.char,
+            fill=self.color, font=("", font_size))
 
     @staticmethod
-    def gen_moves_in_play(moves):
+    def get_font_size():
+        """Cross platform compatability for font size"""
+
+        if sys.platform == "linux":
+            font_size = int(Square.length * 0.74667) # 74.667% of 75 is 56
+        else:
+            font_size = int(Square.length * 0.48) # 48% of 75 is 36
+        return font_size
+
+    @staticmethod
+    def get_moves_in_play(moves):
+        """Return moves within the board"""
+
+        moves_in_play = []
         for move in moves:
             if move[0] in range(8) and move[1] in range(8):
-                yield move
-
-
-class MoveValidation:
-
-    def validate_pawn(self):
-        moves = self.selectedPiece.get_possible_moves()
-        diagonals = moves.get("diagonals")
-        straight = moves.get("straight")
-
-        validMoves = []
-        for move in diagonals:
-            posSquare = self.find_square(*move)
-            posPiece = self.find_piece(*move)
-            if posPiece:
-                if posPiece.color != self.selectedPiece.color:
-                    # enemy piece, attack
-                    posSquare.isThreat = True
-                    validMoves.append(move)
-        for move in straight:
-            posSquare = self.find_square(*move)
-            posPiece = self.find_piece(*move)
-            if not posPiece:
-                posSquare.isPossible = True
-                validMoves.append(move)
-            else:
-                break
-        return validMoves
-
-    def validate_rook(self):
-        moves = self.selectedPiece.get_possible_moves()       
-
-        validMoves = []
-        for _moves in moves.values():
-            for move in _moves:
-                posSquare = self.find_square(*move)
-                posPiece = self.find_piece(*move)
-                if posPiece:
-                    if posPiece.color != self.selectedPiece.color:
-                        # enemy piece
-                        posSquare.isThreat = True
-                        validMoves.append(move)
-                    break    
-                else:
-                    posSquare.isPossible = True
-                    validMoves.append(move)
-        return validMoves
-
-    def validate_knight(self):
-        moves = self.selectedPiece.get_possible_moves()
-        validMoves = []
-        for move in moves:
-            posSquare = self.find_square(*move)
-            posPiece = self.find_piece(*move)
-            if posPiece:
-                if posPiece.color != self.selectedPiece.color:
-                    # enemy piece, attack
-                    posSquare.isThreat = True
-                    validMoves.append(move)
-                else:
-                    # friendly piece
-                    pass
-            else:
-                posSquare.isPossible = True
-                validMoves.append(move)
-
-        return validMoves
-
-    def validate_bishop(self):
-        moves = self.selectedPiece.get_possible_moves()       
-
-        validMoves = []
-        for _moves in moves.values():
-            for move in _moves:
-                posSquare = self.find_square(*move)
-                posPiece = self.find_piece(*move)
-                if posPiece:
-                    if posPiece.color != self.selectedPiece.color:
-                        # enemy piece
-                        posSquare.isThreat = True
-                        validMoves.append(move)
-                    break    
-                else:
-                    posSquare.isPossible = True
-                    validMoves.append(move)
-        return validMoves
-
-    def validate_queen(self):
-        moves = self.selectedPiece.get_possible_moves()       
-
-        validMoves = []
-        for _moves in moves.values():
-            for move in _moves:
-                posSquare = self.find_square(*move)
-                posPiece = self.find_piece(*move)
-                if posPiece:
-                    if posPiece.color != self.selectedPiece.color:
-                        # enemy piece
-                        posSquare.isThreat = True
-                        validMoves.append(move)
-                    break    
-                else:
-                    posSquare.isPossible = True
-                    validMoves.append(move)
-        return validMoves
-
-    def validate_king(self):
-        moves = self.selectedPiece.get_possible_moves()
-        validMoves = []
-        for move in moves:
-            posSquare = self.find_square(*move)
-            posPiece = self.find_piece(*move)
-            if posPiece:
-                if posPiece.color != self.selectedPiece.color:
-                    # enemy piece, attack
-                    posSquare.isThreat = True
-                    validMoves.append(move)
-                else:
-                    # friendly piece
-                    pass
-            else:
-                posSquare.isPossible = True
-                validMoves.append(move)
-        return validMoves
+                moves_in_play.append(move)
+        return moves_in_play
