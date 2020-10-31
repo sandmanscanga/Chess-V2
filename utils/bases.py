@@ -8,9 +8,7 @@ class Square:
     selectedColor = "#ffff00"  # Gold
     possibleColor = "#00e000"  # Green
     threatColor = "#c62828"  # Red
-    isSelected = False
-    isPossible = False
-    isThreat = False
+
 
     @classmethod
     def update_length(cls, length):
@@ -19,6 +17,9 @@ class Square:
     def __init__(self, row, col):
         (self.row, self.col) = (row, col)
         self.color = self.colors[(self.row + self.col) % 2]
+        self.is_selected = False
+        self.is_possible = False
+        self.is_threat = False
 
     def __str__(self):
         return self.position + str(self.length)
@@ -45,21 +46,26 @@ class Square:
 
     @property
     def coords(self):
-        return (self.x1, self.y1, self.x2, self.y2)    
+        return (self.x1, self.y1, self.x2, self.y2)
 
     def draw(self, canvas):
-        if self.isSelected:
+        if self.is_selected:
             canvas.create_rectangle(*self.coords, fill=self.selectedColor)
-        elif self.isPossible:
+        elif self.is_possible:
             canvas.create_rectangle(*self.coords, fill=self.possibleColor)
-        elif self.isThreat:
+        elif self.is_threat:
             canvas.create_rectangle(*self.coords, fill=self.threatColor)
         else:
             canvas.create_rectangle(*self.coords, fill=self.color)
 
+    def reset_state(self):
+        self.is_threat = False
+        self.is_possible = False
+        self.is_selected = False
+
 
 class Piece:
-    
+
     white = "white"
     black = "black"
 
@@ -78,9 +84,9 @@ class Piece:
 
     def draw(self, canvas):
         piece_size = self.get_piece_size()
-        x = (Square.length * self.col) + (Square.length / 2) 
+        x = (Square.length * self.col) + (Square.length / 2)
         y = (Square.length * self.row) + (Square.length / 2)
-        canvas.create_text(x, y, text=self.char, 
+        canvas.create_text(x, y, text=self.char,
             fill=self.color, font=("", piece_size))
 
     def get_possible_moves(self):
@@ -114,14 +120,14 @@ class MoveValidation:
             if posPiece:
                 if posPiece.color != self.selectedPiece.color:
                     # enemy piece, attack
-                    posSquare.isThreat = True
+                    posSquare.is_threat = True
                     validMoves.append(move)
 
         for move in straight:
             posSquare = self.find_square(*move)
             posPiece = self.find_piece(*move)
             if not posPiece:
-                posSquare.isPossible = True
+                posSquare.is_possible = True
                 validMoves.append(move)
             else:
                 break
@@ -129,7 +135,7 @@ class MoveValidation:
         return validMoves
 
     def validate_rook(self):
-        moves = self.selectedPiece.get_possible_moves()       
+        moves = self.selectedPiece.get_possible_moves()
 
         validMoves = []
         for _moves in moves:
@@ -139,11 +145,11 @@ class MoveValidation:
                 if posPiece:
                     if posPiece.color != self.selectedPiece.color:
                         # enemy piece
-                        posSquare.isThreat = True
+                        posSquare.is_threat = True
                         validMoves.append(move)
-                    break    
+                    break
                 else:
-                    posSquare.isPossible = True
+                    posSquare.is_possible = True
                     validMoves.append(move)
 
         return validMoves
@@ -158,16 +164,16 @@ class MoveValidation:
             if posPiece:
                 if posPiece.color != self.selectedPiece.color:
                     # enemy piece, attack
-                    posSquare.isThreat = True
+                    posSquare.is_threat = True
                     validMoves.append(move)
             else:
-                posSquare.isPossible = True
+                posSquare.is_possible = True
                 validMoves.append(move)
 
         return validMoves
 
     def validate_bishop(self):
-        moves = self.selectedPiece.get_possible_moves()       
+        moves = self.selectedPiece.get_possible_moves()
 
         validMoves = []
         for _moves in moves:
@@ -177,17 +183,17 @@ class MoveValidation:
                 if posPiece:
                     if posPiece.color != self.selectedPiece.color:
                         # enemy piece
-                        posSquare.isThreat = True
+                        posSquare.is_threat = True
                         validMoves.append(move)
-                    break    
+                    break
                 else:
-                    posSquare.isPossible = True
+                    posSquare.is_possible = True
                     validMoves.append(move)
 
         return validMoves
 
     def validate_queen(self):
-        moves = self.selectedPiece.get_possible_moves()       
+        moves = self.selectedPiece.get_possible_moves()
 
         validMoves = []
         for _moves in moves:
@@ -197,11 +203,11 @@ class MoveValidation:
                 if posPiece:
                     if posPiece.color != self.selectedPiece.color:
                         # enemy piece
-                        posSquare.isThreat = True
+                        posSquare.is_threat = True
                         validMoves.append(move)
-                    break    
+                    break
                 else:
-                    posSquare.isPossible = True
+                    posSquare.is_possible = True
                     validMoves.append(move)
 
         return validMoves
@@ -216,10 +222,10 @@ class MoveValidation:
             if posPiece:
                 if posPiece.color != self.selectedPiece.color:
                     # enemy piece, attack
-                    posSquare.isThreat = True
+                    posSquare.is_threat = True
                     validMoves.append(move)
             else:
-                posSquare.isPossible = True
+                posSquare.is_possible = True
                 validMoves.append(move)
 
         return validMoves
