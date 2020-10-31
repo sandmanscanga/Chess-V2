@@ -361,7 +361,7 @@ class Board:
             "vailidMoves": str(self.valid_moves),
             "turn": str(self.turn),
             "squareLength": self.square.length if self.square else None,
-            "pieceSize": self.piece.get_piece_size() if self.piece else None
+            "pieceSize": self.piece.get_font_size() if self.piece else None
         }, indent=2))
 
     @staticmethod
