@@ -25,10 +25,10 @@ class Pawn(Piece):
             if self.hasNotMoved:
                 straight.append((self.row + 2, self.col))
         
-        moves = {
-            "diagonals": list(self.gen_moves_in_play(diagonals)),
-            "straight": list(self.gen_moves_in_play(straight))
-        }
+        moves = [
+            self.get_moves_in_play(diagonals),
+            self.get_moves_in_play(straight)
+        ]
         return moves
 
 
@@ -42,12 +42,12 @@ class Rook(Piece):
         east = [(self.row, self.col + n) for n in range(1, 9)]
         south = [(self.row + n, self.col) for n in range(1, 9)]
         west = [(self.row, self.col - n) for n in range(1, 9)]
-        moves = {
-            "north": list(self.gen_moves_in_play(north)),
-            "east": list(self.gen_moves_in_play(east)),
-            "south": list(self.gen_moves_in_play(south)),
-            "west": list(self.gen_moves_in_play(west))
-        }
+        moves = [
+            self.get_moves_in_play(north),
+            self.get_moves_in_play(east),
+            self.get_moves_in_play(south),
+            self.get_moves_in_play(west)
+        ]
         return moves
 
 
@@ -67,7 +67,7 @@ class Knight(Piece):
             (self.row + 1, self.col - 2),
             (self.row - 1, self.col - 2),
         ]
-        moves = list(self.gen_moves_in_play(_moves))
+        moves = self.get_moves_in_play(_moves)
         return moves
 
 
@@ -81,12 +81,12 @@ class Bishop(Piece):
         southEast = [(self.row + n, self.col + n) for n in range(1, 9)]
         southWest = [(self.row + n, self.col - n) for n in range(1, 9)]
         northWest = [(self.row - n, self.col - n) for n in range(1, 9)]
-        moves = {
-            "northEast": list(self.gen_moves_in_play(northEast)),
-            "southEast": list(self.gen_moves_in_play(southEast)),
-            "southWest": list(self.gen_moves_in_play(southWest)),
-            "northWest": list(self.gen_moves_in_play(northWest)),
-        }
+        moves = [
+            self.get_moves_in_play(northEast),
+            self.get_moves_in_play(southEast),
+            self.get_moves_in_play(southWest),
+            self.get_moves_in_play(northWest)
+        ]
         return moves
 
 
@@ -104,16 +104,16 @@ class Queen(Piece):
         southWest = [(self.row + n, self.col - n) for n in range(1, 9)]
         west = [(self.row, self.col - n) for n in range(1, 9)]
         northWest = [(self.row - n, self.col - n) for n in range(1, 9)]
-        moves = {
-            "north": list(self.gen_moves_in_play(north)),
-            "northEast": list(self.gen_moves_in_play(northEast)),
-            "east": list(self.gen_moves_in_play(east)),
-            "southEast": list(self.gen_moves_in_play(southEast)),
-            "south": list(self.gen_moves_in_play(south)),
-            "southWest": list(self.gen_moves_in_play(southWest)),
-            "west": list(self.gen_moves_in_play(west)),
-            "northWest": list(self.gen_moves_in_play(northWest)),
-        }
+        moves = [
+            self.get_moves_in_play(north),
+            self.get_moves_in_play(northEast),
+            self.get_moves_in_play(east),
+            self.get_moves_in_play(southEast),
+            self.get_moves_in_play(south),
+            self.get_moves_in_play(southWest),
+            self.get_moves_in_play(west),
+            self.get_moves_in_play(northWest),
+        ]
         return moves
 
 
@@ -133,5 +133,5 @@ class King(Piece):
             (self.row, self.col - 1),
             (self.row - 1, self.col - 1),
         ]
-        moves = list(self.gen_moves_in_play(_moves))
+        moves = self.get_moves_in_play(_moves)
         return moves
