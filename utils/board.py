@@ -2,13 +2,14 @@
 import tkinter as tk
 import json
 
-from utils.bases import Square, MoveValidation
+from utils.bases import Square
 from utils.pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-public-methods
 
 
-class Board(MoveValidation):
+class Board:
     """Contains logic to render and resize board"""
 
     turn = 0
@@ -220,6 +221,135 @@ class Board(MoveValidation):
         self.selected_piece.col = col
         self.selected_piece = None
         self.valid_moves = []
+
+    def validate_pawn(self):
+        """Returns valid moves for pawn"""
+
+        (diagonals, straight) = self.selected_piece.get_possible_moves()
+
+        valid_moves = []
+        for move in diagonals:
+            pos_square = self.find_square(*move)
+            pos_piece = self.find_piece(*move)
+            if pos_piece:
+                if pos_piece.color != self.selected_piece.color:
+                    # enemy piece, attack
+                    pos_square.is_threat = True
+                    valid_moves.append(move)
+
+        for move in straight:
+            pos_square = self.find_square(*move)
+            pos_piece = self.find_piece(*move)
+            if not pos_piece:
+                pos_square.is_possible = True
+                valid_moves.append(move)
+            else:
+                break
+
+        return valid_moves
+
+    def validate_rook(self):
+        """Returns valid moves for rook"""
+
+        moves = self.selected_piece.get_possible_moves()
+
+        valid_moves = []
+        for _moves in moves:
+            for move in _moves:
+                pos_square = self.find_square(*move)
+                pos_piece = self.find_piece(*move)
+                if pos_piece:
+                    if pos_piece.color != self.selected_piece.color:
+                        # enemy piece
+                        pos_square.is_threat = True
+                        valid_moves.append(move)
+                    break
+                pos_square.is_possible = True
+                valid_moves.append(move)
+
+        return valid_moves
+
+    def validate_knight(self):
+        """Returns valid moves for knight"""
+
+        moves = self.selected_piece.get_possible_moves()
+
+        valid_moves = []
+        for move in moves:
+            pos_square = self.find_square(*move)
+            pos_piece = self.find_piece(*move)
+            if pos_piece:
+                if pos_piece.color != self.selected_piece.color:
+                    # enemy piece, attack
+                    pos_square.is_threat = True
+                    valid_moves.append(move)
+            else:
+                pos_square.is_possible = True
+                valid_moves.append(move)
+
+        return valid_moves
+
+    def validate_bishop(self):
+        """Returns valid moves for bishop"""
+
+        moves = self.selected_piece.get_possible_moves()
+
+        valid_moves = []
+        for _moves in moves:
+            for move in _moves:
+                pos_square = self.find_square(*move)
+                pos_piece = self.find_piece(*move)
+                if pos_piece:
+                    if pos_piece.color != self.selected_piece.color:
+                        # enemy piece
+                        pos_square.is_threat = True
+                        valid_moves.append(move)
+                    break
+                pos_square.is_possible = True
+                valid_moves.append(move)
+
+        return valid_moves
+
+    def validate_queen(self):
+        """Returns valid moves for queen"""
+
+        moves = self.selected_piece.get_possible_moves()
+
+        valid_moves = []
+        for _moves in moves:
+            for move in _moves:
+                pos_square = self.find_square(*move)
+                pos_piece = self.find_piece(*move)
+                if pos_piece:
+                    if pos_piece.color != self.selected_piece.color:
+                        # enemy piece
+                        pos_square.is_threat = True
+                        valid_moves.append(move)
+                    break
+                pos_square.is_possible = True
+                valid_moves.append(move)
+
+        return valid_moves
+
+    def validate_king(self):
+        """Returns valid moves for king"""
+
+        moves = self.selected_piece.get_possible_moves()
+
+        valid_moves = []
+        for move in moves:
+            pos_square = self.find_square(*move)
+            pos_piece = self.find_piece(*move)
+            if pos_piece:
+                if pos_piece.color != self.selected_piece.color:
+                    # enemy piece, attack
+                    pos_square.is_threat = True
+                    valid_moves.append(move)
+            else:
+                pos_square.is_possible = True
+                valid_moves.append(move)
+
+        return valid_moves
 
     def display(self):
         """Prints game data"""
