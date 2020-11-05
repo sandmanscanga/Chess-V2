@@ -3,7 +3,7 @@ import sys
 from utils.logger import LOGGER
 
 logger = LOGGER.get_logger('bases')
-logger.info('Hello from bases')
+logger.debug('Hello from bases')
 
 
 class Square:
