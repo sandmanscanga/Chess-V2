@@ -1,5 +1,9 @@
 """Module contains square and piece logic"""
 import sys
+from utils.logger import LOGGER
+
+logger = LOGGER.get_logger('bases')
+logger.info('Hello from bases')
 
 
 class Square:

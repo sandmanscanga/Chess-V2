@@ -2,12 +2,14 @@
 import tkinter as tk
 import json
 
+from utils.logger import LOGGER
 from utils.bases import Square
 from utils.pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=too-many-public-methods
 
+logger = LOGGER.get_logger('board')
 
 class Board:
     """Contains logic to render and resize board"""
@@ -354,7 +356,7 @@ class Board:
     def display(self):
         """Prints game data"""
 
-        print(json.dumps({
+        logger.info(json.dumps({
             "square": str(self.square),
             "piece": str(self.piece),
             "selected_piece": str(self.selected_piece),
