@@ -3,7 +3,7 @@ from .bases import Piece
 from utils.logger import LOGGER
 
 logger = LOGGER.get_logger('pieces')
-logger.info('Hello from pieces')
+logger.debug('Hello from pieces')
 
 class Pawn(Piece):
     """Contains logic for pawn"""
