@@ -95,7 +95,7 @@ class Board:
                     self.selected_piece = self.piece
                 else:
                     # incorrect color chosen based on turn color
-                    print(f"It's {self.turn_color}'s turn!")
+                    logger.warning(f"It's {self.turn_color}'s turn!")
             else:
                 # square clicked, deselecting
                 self.selected_piece = None
@@ -110,6 +110,8 @@ class Board:
                     # enemy piece was clicked
                     if (row, col) in self.valid_moves:
                         # enemy piece is captured
+                        _msg = f'{self.selected_piece} takes {self.piece}'
+                        logger.info(_msg)
                         self.move_piece(row, col)
                         self.remove_piece(self.piece)
                         Board.inc_turn()
@@ -120,6 +122,8 @@ class Board:
                 # a square was clicked
                 if (row, col) in self.valid_moves:
                     # square is valid, moving piece
+                    _pos = self.get_position(row, col)
+                    logger.info(f'{self.selected_piece} moves to {_pos}')
                     self.move_piece(row, col)
                     Board.inc_turn()
                 else:
@@ -218,7 +222,7 @@ class Board:
         """Moves selected piece to coordinates"""
 
         if self.selected_piece.name == "Pawn":
-            self.selected_piece.hasNotMoved = False
+            self.selected_piece.has_not_moved = False
         self.selected_piece.row = row
         self.selected_piece.col = col
         self.selected_piece = None
@@ -356,7 +360,7 @@ class Board:
     def display(self):
         """Prints game data"""
 
-        logger.info(json.dumps({
+        logger.debug(json.dumps({
             "square": str(self.square),
             "piece": str(self.piece),
             "selected_piece": str(self.selected_piece),
@@ -364,7 +368,13 @@ class Board:
             "turn": str(self.turn),
             "squareLength": self.square.length if self.square else None,
             "pieceSize": self.piece.get_font_size() if self.piece else None
-        }, indent=2))
+        }))
+
+    @staticmethod
+    def get_position(row, col):
+        """Gets the board position based on a row and col input"""
+
+        return "ABCDEFGH"[col] + str(row + 1)
 
     @staticmethod
     def init_squares():
