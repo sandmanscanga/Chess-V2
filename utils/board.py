@@ -218,7 +218,7 @@ class Board:
         """Moves selected piece to coordinates"""
 
         if self.selected_piece.name == "Pawn":
-            self.selected_piece.hasNotMoved = False
+            self.selected_piece.has_not_moved = False
         self.selected_piece.row = row
         self.selected_piece.col = col
         self.selected_piece = None

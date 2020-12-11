@@ -1,6 +1,8 @@
 """Module contains logic for pieces"""
-from .bases import Piece
 from utils.logger import LOGGER
+from utils.bases import Piece
+
+# pylint: disable=too-few-public-methods
 
 logger = LOGGER.get_logger('pieces')
 logger.debug('Hello from pieces')
