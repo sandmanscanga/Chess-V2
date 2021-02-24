@@ -30,7 +30,7 @@ class Square:
         self.is_threat = False
 
     def __str__(self):
-        return self.position + str(self.length)
+        return str(self.length)
 
     @property
     def position(self):
