@@ -11,7 +11,7 @@ from utils.pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 logger = LOGGER.get_logger('board')
 
-class Board:
+class Board():
     """Contains logic to render and resize board"""
 
     turn = 0
@@ -30,7 +30,6 @@ class Board:
         cls.board_size = size
 
     def __init__(self, master):
-        super().__init__()
         self.master = master
         self.canvas = tk.Canvas(self.master,
             width=self.board_size, height=self.board_size)
@@ -95,7 +94,7 @@ class Board:
                     self.selected_piece = self.piece
                 else:
                     # incorrect color chosen based on turn color
-                    print(f"It's {self.turn_color}'s turn!")
+                    logger.warning(f"It's {self.turn_color}'s turn!")
             else:
                 # square clicked, deselecting
                 self.selected_piece = None
