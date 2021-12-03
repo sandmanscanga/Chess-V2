@@ -11,7 +11,8 @@ from utils.pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 logger = LOGGER.get_logger('board')
 
-class Board():
+
+class Board:
     """Contains logic to render and resize board"""
 
     turn = 0
@@ -188,7 +189,6 @@ class Board():
     def get_valid_moves(self):
         """Retrieves valid moves for selected piece"""
 
-        validate_func = None
         if self.selected_piece.name == "Knight":
             validate_func = self.validate_knight
         elif self.selected_piece.name == "King":
@@ -359,7 +359,7 @@ class Board():
             "square": str(self.square),
             "piece": str(self.piece),
             "selected_piece": str(self.selected_piece),
-            "vailidMoves": str(self.valid_moves),
+            "validMoves": str(self.valid_moves),
             "turn": str(self.turn),
             "squareLength": self.square.length if self.square else None,
             "pieceSize": self.piece.get_font_size() if self.piece else None
@@ -386,6 +386,7 @@ class Board():
                 if row in (0, 1, 6, 7):
                     color = "black" if row in (0, 1) else "white"
 
+                    piece = None
                     if row in (1, 6):
                         piece = Pawn(row, col, color)
                     elif row in (0, 7):
